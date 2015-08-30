@@ -58,9 +58,9 @@
        index_full <- data_degradation(new.data, degra = degra, perct = 1)
 
         # Example with 40% missing with a constraint to keep peak weeks in the degradation process
-        degra <- degradation_prop(new.data, pheno = pheno_full, perct = 0.3,fully_random_subsample = FALSE, keep_peak_in_subsample = TRUE)
+        degra <- degradation_prop(new.data, pheno = pheno_full, perct = 0.6,fully_random_subsample = FALSE, keep_peak_in_subsample = TRUE)
 		
-        index_degrad60 <- data_degradation(new.data, degra = degra, perct = 0.3)
+        index_degrad60 <- data_degradation(new.data, degra = degra, perct = 0.6)
 
         # Compute percent error for the degraded dataset (60%)
         perct_error06rg <- data.frame(degrad=0.6,perct_pheno= index_degrad60$prop_pheno_sampled,pct_error=(index_degrad60$regional_gam-index_full$regional_gam)/index_full$regional_gam)
