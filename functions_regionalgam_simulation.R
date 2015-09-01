@@ -1,6 +1,6 @@
 #################################################################################
 #
-# R-script corresponding to the paper published in Journal of Applied Ecology
+# R-script corresponding to our paper subimitted for publication in Journal of Applied Ecology
 # Title:
 # Regionally informed abundance index for supporting integrative analyses across butterfly monitoring schemes
 # Authors:
