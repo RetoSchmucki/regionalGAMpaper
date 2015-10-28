@@ -14,6 +14,7 @@
 # Kuussaari Mikko; Van Strien Arco; Ries Leslie; Settele Josef; Musche Martin; Carnicer 
 # Jofre; Schweiger Oliver; Brereton Tom; Heliölä Janne; Harpke Alexander; Kühn Elisabeth; 
 # Julliard Romain. (2015) A Regionally informed abundance index for supporting integrative 
+# analyses across butterfly monitoring schemes. Journal of Applied Ecology. 
 #
 # 2. Installation and usage of the R package regionalGAM to compute abundance indices with the 
 # regional GAM method, using the dataset collected for Gatekeeper Pyronia tithonus (Linnaeus 1767). 
