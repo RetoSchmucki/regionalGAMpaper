@@ -1,14 +1,27 @@
 #################################################################################
+# 
+#	Appendix S1
+#	
+#	- PLEASE READ CAREFULLY -
 #
-# R-script corresponding to our paper subimitted for publication in Journal of Applied Ecology
-# Title:
-# Regionally informed abundance index for supporting integrative analyses across butterfly monitoring schemes
-# Authors:
-# Schmucki, Reto; Pe'er, Guy; Roy, David; Stefanescu, Constanti; Van Swaay, Chris; Oliver, Tom; 
-# Kuussaari, Mikko; Van Strien, Arco; Ries, Leslie; Settele, Josef; Musche, Martin; Carnicer, 
-# Jofre; Schweiger, Oliver; Brereton, Tom; Heliölä, Janne; Harpke, Alexander; Kühn, Elisabeth; 
-# Julliard, Romain
+# R-script corresponding to the method presented in: 
 #
+# Schmucki Reto; Pe'er Guy; Roy David; Stefanescu Constanti; Van Swaay Chris; Oliver Tom; 
+# Kuussaari Mikko; Van Strien Arco; Ries Leslie; Settele Josef; Musche Martin; Carnicer 
+# Jofre; Schweiger Oliver; Brereton Tom; Heliölä Janne; Harpke Alexander; Kühn Elisabeth; 
+# Julliard Romain. (2015) A Regionally informed abundance index for supporting integrative 
+# analyses across butterfly monitoring schemes. Journal of Applied Ecology
+#
+# NOTE: The latest version of this script is available for download from my GitHub repository
+#
+# => https://github.com/RetoSchmucki/regionalGAMpaper.git
+#
+# The functions required to compute the regional GAM index are part of an R package that 
+# is available for installation from this GitHub repository https://github.com/RetoSchmucki/regionalGAM
+#
+# For installation and usage, please refer to the second example in Appendix S3 or in follow
+# the instructions in the README.md document available on the GitHub repository:
+# https://github.com/RetoSchmucki/regionalGAM/tree/master
 #
 # ==================================================================================
 #
@@ -32,17 +45,17 @@
 #
 #
 # This script was developed by Reto Schmucki - reto.schmucki[at]mail.mcgill.ca
-# Functions trap_area(), trap_index(), and flight_curve() where initially developed by
-# Colin A. Harrower at the NERC Centre for Ecology and Hydrology, Crowmarsh Gifford, Oxfordshire, UK
+# Functions trap_area(), trap_index(), and flight_curve() where adapted from the script initially developed by
+# Colin A. Harrower at the NERC Centre for Ecology and Hydrology (CEH), Crowmarsh Gifford, Oxfordshire, UK
 #
-# A short example is provided in "example_simulation_regionalgam.R"
+# The two-stage model was first presented in: 
+# Dennis, E.B., Freeman, S.N., Brereton, T. & Roy, D.B. (2013) Indexing butterfly abundance 
+# whilst accounting for missing counts and variability in seasonal pattern. 
+# Methods in Ecology and Evolution, 4, 637–645.
 #
-# These functions will be part of a R packages that we are working on, stay tuned.
-#
-# NOTE: latest version of this script available for download from my github repository
-#
-# => https://github.com/RetoSchmucki/regionalGAMpaper.git
-#
+# A worked example for data simulation and degradation is provided in Appendix S3 available in 
+# online supporting information.
+# 
 ######################################################################################
 
 
@@ -53,13 +66,19 @@
 year_day_func = function(sp_data) {
     
     year <- unique(sp_data$YEAR)
-    
-	# adjust for leep year
     origin.d <- paste(year, "01-01", sep = "-")
-    if ((year%%4 == 0) & ((year%%100 != 0) | (year%%400 == 0))) {
-        nday <- 366
+    
+    # adjust for leep year with real data (i.e. years > 1000)
+    if (year > 1000) {
+    
+    	if ((year%%4 == 0) & ((year%%100 != 0) | (year%%400 == 0))) {
+        	nday <- 366
+    	} else {
+       		nday <- 365
+    	}
+    
     } else {
-        nday <- 365
+    nday <- 365
     }
     
     date.serie <- as.POSIXlt(seq(as.Date(origin.d), length = nday, by = "day"), format = "%Y-%m-%d")
@@ -200,16 +219,18 @@ flight_count_sim <- function(fully_random_subsample = FALSE, nyear = 10, nsite =
     declinetrend <- round(annual_decline, 3)
     
     # generate a year day data.frame
-    dayno <- c(1:365)
-    month <- as.numeric(matrix(unlist(strsplit(unlist(as.character(strptime(dayno, 
-        "%j"))), "-")), ncol = 3, byrow = T)[, 2])
-    week <- as.numeric(unlist(strftime(strptime(dayno, "%j"), format = "%W"))) + 
-        1
-    week_day <- as.numeric(unlist(strftime(strptime(dayno, "%j"), format = "%u")))
-    day <- as.numeric(matrix(unlist(strsplit(unlist(as.character(strptime(dayno, 
-        "%j"))), "-")), ncol = 3, byrow = T)[, 3])
     
-    year_day <- data.frame(JULIAN_D = dayno, MONTH = month, WEEK = week, WEEK_DAY = week_day)
+    origin.d <- paste(1, "01-01", sep = "-")
+    nday <- 365
+    date.serie <- as.POSIXlt(seq(as.Date(origin.d), length = nday, by = "day"), format = "%Y-%m-%d")
+    
+	dayno <- as.numeric(julian(date.serie, origin = as.Date(origin.d)) + 1)
+    month <- as.numeric(strftime(date.serie, format = "%m"))
+    week <- as.numeric(strftime(date.serie, format = "%W"))
+    week_day <- as.numeric(strftime(date.serie, format = "%u"))
+    day <- as.numeric(strftime(date.serie, format = "%d"))
+    
+    year_day <- data.frame(JULIAN_D = dayno, MONTH = month, WEEK = week, WEEK_DAY = week_day, DAY=day)
     year_day_sample_cummul <- data.frame()
     
     t <- year_day$JULIAN_D
@@ -371,7 +392,7 @@ flight_curve <- function(year_day_sample_cummul_26w, y = 1) {
     require(mgcv) 
 
     dataset <- year_day_sample_cummul_26w[, c("SPECIES", "SITE", "YEAR", "MONTH", 
-        "WEEK_DAY", "JULIAN_D", "COUNT")]
+        "DAY","JULIAN_D", "COUNT")]
     dataset$X_COORD <- 1
     dataset$Y_COORD <- 1
     dataset <- data.frame(dataset, stringsAsFactors = FALSE)
@@ -386,7 +407,7 @@ flight_curve <- function(year_day_sample_cummul_26w, y = 1) {
     
     dataset_y <- dataset[dataset$YEAR == y, ]
     if(nsite > 200){
-	dataset_y <- dataset_y[dataset_y$SITE%in%unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)],]
+	dataset_y <- dataset_y[as.character(dataset_y$SITE)%in%as.character(unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)]),]
     } else { dataset_y <- dataset_y 
     }
 
@@ -409,7 +430,7 @@ flight_curve <- function(year_day_sample_cummul_26w, y = 1) {
         
         dataset_y <- dataset[dataset$YEAR == y, ]
         if(nsite > 200){
-	    dataset_y <- dataset_y[dataset_y$SITE%in%unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)],]
+	    dataset_y <- dataset_y[as.character(dataset_y$SITE)%in%as.character(unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)]),]
         } else { dataset_y <- dataset_y 
         }
 
@@ -544,7 +565,7 @@ flight_curve1y <- function(dataset_y) {
     nsite <- length(unique(dataset_y$SITE))
     
     if(nsite > 200){
-	dataset_y <- dataset_y[dataset_y$SITE%in%unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)],]
+	dataset_y <- dataset_y[as.character(dataset_y$SITE)%in%as.character(unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)]),]
     } else { dataset_y <- dataset_y 
     }
 
@@ -567,7 +588,7 @@ flight_curve1y <- function(dataset_y) {
         
         dataset_y <- dataset[dataset$YEAR == y, ]
         if(nsite > 200){
-	    dataset_y <- dataset_y[dataset_y$SITE%in%unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)],]
+	    dataset_y <- dataset_y[as.character(dataset_y$SITE)%in%as.character(unique(dataset_y$SITE)[sample(1:nsite,200,replace=F)]),]
         } else { dataset_y <- dataset_y 
         }
 
@@ -813,11 +834,11 @@ degradation_prop <- function(year_day_sample_cummul_26w, pheno = flight_pheno, p
                 }
             }
             
-            weeksnumbermat <- as.data.frame(matrix(NA, ncol = 27, nrow = 1))
+            weeksnumbermat <- as.data.frame(matrix(NA, ncol = 26, nrow = 1))
             weeksnumbermat[1:length(subset_weekno)] <- subset_weekno
             
             degradation_pattern <- cbind(data.frame(year = y, peak_week = regional_peak_week, 
-                week_percentage = perct, iteration = iteration), weeksnumbermat)
+                prop_week_sampled = perct, iteration = iteration), weeksnumbermat)
             
             # bind if exist else create
             if ("degradation_pattern_cummul" %in% ls()) {
@@ -832,13 +853,13 @@ degradation_prop <- function(year_day_sample_cummul_26w, pheno = flight_pheno, p
     return(list(degradation_pattern_cummul = degradation_pattern_cummul, pheno = pheno))
 }
 
-##################################################
+#####################################################
 # 9. compute Abundance indices for degraded datasets
-##################################################
+#####################################################
 
-data_degradation <- function(year_day_sample_cummul_26w, degra = degra, perct = 0.6, 
+data_degradation <- function(year_day_sample_cummul_26w =new.data, degra = degra, perct = 1,
     fully_random_subsample = FALSE, keep_peak_in_subsample = TRUE) {
-    
+
      if ("cumullated_indices" %in% ls()) 
         rm(cumullated_indices)
     cumullated_indices <- data.frame()
@@ -852,15 +873,15 @@ data_degradation <- function(year_day_sample_cummul_26w, degra = degra, perct = 
         perct_deg <- degra$degradation_pattern_cummul[degra$degradation_pattern_cummul$year == 
             y, ]
         
-        site_deg_mat <- as.matrix(perct_deg[, 5:31])
+        site_deg_mat <- as.matrix(perct_deg[, 5:30])
         
         site_deg_long <- data.frame(site = rep(unique(sp_data_site$SITE), rep(ncol(site_deg_mat), 
             nrow(site_deg_mat))), week = c(t(site_deg_mat)))
         
         site_deg_clean <- site_deg_long[!is.na(site_deg_long$week), ]
         
-        dataset <- sp_data_site[, c("SPECIES", "SITE", "YEAR", "MONTH", 
-            "WEEK_DAY", "JULIAN_D", "COUNT")]
+    	dataset <- sp_data_site[, c("SPECIES", "SITE", "YEAR", "MONTH", 
+            "DAY", "JULIAN_D", "COUNT")]
         dataset$X_COORD <- 1
         dataset$Y_COORD <- 1
         dataset <- data.frame(dataset, stringsAsFactors = FALSE)
@@ -872,8 +893,8 @@ data_degradation <- function(year_day_sample_cummul_26w, degra = degra, perct = 
             "X_COORD", "Y_COORD")
 
         sp_data_site <- year_day_func(dataset)
-        sp_data_site$trimDAYNO <- sp_data_site$DAYNO - min(sp_data_site$DAYNO) + 
-            1
+        
+        sp_data_site$trimDAYNO <- sp_data_site$DAYNO - min(sp_data_site$DAYNO) + 1
         
         sp_data_site$COUNT[!paste(sp_data_site$SITE, sp_data_site$WEEK, sep = "_") %in% 
             paste(site_deg_clean$site, site_deg_clean$week, sep = "_")] <- NA
@@ -929,10 +950,11 @@ data_degradation <- function(year_day_sample_cummul_26w, degra = degra, perct = 
         cumu_index <- merge(cumu_index, year_count_index[, c("SITE", "SINDEX")], 
             by = c("SITE"), all.x = TRUE, sort = FALSE)
         names(cumu_index) <- c("SITE", "SPECIES", "YEAR", "regional_gam", "prop_pheno_sampled", 
-            "year_count")
+            "linear_interp_index")
         cumu_index$regional_peak_week <- degra$degradation_pattern_cummul[degra$degradation_pattern_cummul$year == 
             y, ][1, "peak_week"]
-        cumu_index$week_percentage <- unique(degra$degradation_pattern_cummul$week_percentage)
+        cumu_index <- cumu_index[,c("SITE", "SPECIES", "YEAR", "regional_gam","linear_interp_index","regional_peak_week","prop_pheno_sampled")] 
+        cumu_index$prop_week_sampled <- perct
         cumu_index <- cumu_index[order(cumu_index$SITE), ]
         
         
