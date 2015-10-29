@@ -6,15 +6,14 @@
 #
 # This script contains two worked examples:
 #
-# 1. showing on how to generate simulated butterfly count data, impose
-# specific degradation level and compute the regional GAM abundance indices using the 
+# 1. showing how to generate simulated butterfly count data, impose a
+# specific degradation level, and compute the regional GAM abundance indices using the 
 # regionalGAM method presented in:
 # 
-# Schmucki Reto; Pe'er Guy; Roy David; Stefanescu Constanti; Van Swaay Chris; Oliver Tom; 
-# Kuussaari Mikko; Van Strien Arco; Ries Leslie; Settele Josef; Musche Martin; Carnicer 
-# Jofre; Schweiger Oliver; Brereton Tom; Heliölä Janne; Harpke Alexander; Kühn Elisabeth; 
-# Julliard Romain. (2015) A Regionally informed abundance index for supporting integrative 
-# analyses across butterfly monitoring schemes. Journal of Applied Ecology. 
+# Schmucki, R., Pe’er, G., Roy, D. b., Stefanescu, C., Van Swaay, C. a. m., Oliver, T. h., Kuussaari, M.,
+# Van Strien, A. j., Ries, L., Settele, J., Musche, M., Carnicer, J., Schweiger, O., Brereton, T. m., 
+# Harpke, A., Heliölä, J., Kühn, E. & Julliard, R. (2015) A regionally informed abundance index for supporting 
+# integrative analyses across butterfly monitoring schemes. Journal of Applied Ecology. DOI: 10.1111/1365-2664.12561
 #
 # 2. Installation and usage of the R package regionalGAM to compute abundance indices with the 
 # regional GAM method, using the dataset collected for Gatekeeper Pyronia tithonus (Linnaeus 1767). 
